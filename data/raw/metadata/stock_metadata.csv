@@ -1,6 +1,6 @@
-ticker,company_name,sector,industry_group,exchange,hose_listing_date,note
+code,company_name,sector,industry_group,exchange,hose_listing_date,note
 VCB,Vietcombank,Banking,Financials,HOSE,2009-06-30,Banking representative
 FPT,FPT Corporation,Technology,Information Technology,HOSE,2006-12-13,Technology representative
-TCB,Techcombank,Banking,Financials,HOSE,2018-06-04,Banking representative
+VIC,Vingroup,Real Estate,Conglomerate/Real Estate,HOSE,2007-09-19,Real estate representative
 HPG,Hoa Phat Group,Steel/Industrial,Materials,HOSE,2007-11-15,Steel and industrial representative
 VNM,Vinamilk,Consumer Goods,Consumer Staples,HOSE,2006-01-19,Consumer goods representative

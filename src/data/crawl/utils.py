@@ -7,7 +7,7 @@ import pandas as pd
 
 DEFAULT_SOURCE = "VCI"
 
-DATE_COLUMN_CANDIDATES = ("time", "date", "trading_date", "tradingDate")
+DATE_COLUMN_CANDIDATES = ("trading_date", "date", "time", "tradingDate")
 
 
 def _normalize_interval(interval: str) -> str:
