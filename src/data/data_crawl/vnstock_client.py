@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def _history_with_current_vnstock(
-    ticker: str,
+    code: str,
     start_date: str,
     end_date: str,
     interval: str,
@@ -12,12 +12,12 @@ def _history_with_current_vnstock(
 ) -> pd.DataFrame:
     from vnstock import Quote
 
-    quote = Quote(source=source, symbol=ticker)
+    quote = Quote(source=source, symbol=code)
     return quote.history(start=start_date, end=end_date, interval=interval)
 
 
 def _history_with_legacy_vnstock(
-    ticker: str,
+    code: str,
     start_date: str,
     end_date: str,
     interval: str,
@@ -27,7 +27,7 @@ def _history_with_legacy_vnstock(
     resolution = "1D" if interval == "1D" else interval
 
     return stock_historical_data(
-        symbol=ticker,
+        symbol=code,
         start_date=start_date,
         end_date=end_date,
         resolution=resolution,

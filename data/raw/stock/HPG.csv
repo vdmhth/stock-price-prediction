@@ -1,4 +1,4 @@
-﻿ticker,time,open,high,low,close,volume
+﻿code,time,open,high,low,close,volume
 HPG,2007-11-15,2.01,2.01,1.69,1.97,1306330
 HPG,2007-11-16,1.87,1.87,1.87,1.87,248510
 HPG,2007-11-19,1.78,1.78,1.78,1.78,120480

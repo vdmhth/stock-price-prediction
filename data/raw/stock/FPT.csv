@@ -1,4 +1,4 @@
-﻿ticker,time,open,high,low,close,volume
+﻿code,time,open,high,low,close,volume
 FPT,2006-12-13,9.76,9.76,9.76,9.76,83530
 FPT,2006-12-14,10.25,10.25,10.25,10.25,280710
 FPT,2006-12-15,10.76,10.76,10.76,10.76,265300

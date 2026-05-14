@@ -30,7 +30,7 @@ def crawl_market_index(
     interval = _normalize_interval(interval)
 
     df = _history_with_current_vnstock(
-        ticker=index_symbol,
+        code=index_symbol,
         start_date=start_date,
         end_date=end_date,
         interval=interval,
