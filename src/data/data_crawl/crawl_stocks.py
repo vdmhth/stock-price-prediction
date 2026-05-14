@@ -88,7 +88,7 @@ def save_stock_price(
         source=source,
     )
 
-    file_path = output_path / f"{ticker.upper()}_raw.csv"
+    file_path = output_path / f"{ticker.upper()}.csv"
     df.to_csv(file_path, index=False, encoding="utf-8-sig")
 
     return file_path

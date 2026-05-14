@@ -74,7 +74,7 @@ def save_market_index(
         source=source,
     )
 
-    file_path = output_path / f"{index_symbol.upper()}_raw.csv"
+    file_path = output_path / f"{index_symbol.upper()}.csv"
     df.to_csv(file_path, index=False, encoding="utf-8-sig")
 
     return file_path
