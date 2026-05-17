@@ -1,41 +1,138 @@
-''' Rooling volatility and liquidity diagnosis'''
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 
-from .constants import HOSE_DAILY_LIMIT_LOG, TRADING_DAYS_PER_YEAR, ZERO_RETURN_TOL
 
-def rolling_vol_annualized(returns:pd.Series, window: int =60) ->pd.Series:
-    # rolling standard deviation of returns, annualizezd by sqrt(252)
-    return returns.rolling(window).std()*np.sqrt(TRADING_DAYS_PER_YEAR)
-def rolling_vol_panel(df:pd.DataFrame,return_cols: list[str],window: int =60) ->pd.DataFrame:
-    return pd.DataFrame(
-        {c: rolling_vol_annualized(df[c],window) for c in return_cols}, index = df.index
-    )
-def liquidity_stats(returns: pd.Series, volume: pd.Series | None= None):
-    """Diagnostics on data quality/liquidity of a return series
-    pct_zero -> % of days with log_return ~= 0
-    pct_limit_up % of days hitting the +7% HOSE cap (within 1 bp)
-    pct _limit_down % of days hitting the -7% HOSE cap 
-    pct_zero_no_volume % of zero_return days that also have volume = 0
+def rolling_vol_panel(
+    wide: pd.DataFrame,
+    return_cols: list[str],
+    window: int = 60,
+    min_periods: int | None = None,
+    annualization_factor: int = 252,
+) -> pd.DataFrame:
     """
-    r = returns.dropna()
-    n = len(r)
-    if  n ==0 :
-        return {}
-    zero = r.abs() < ZERO_RETURN_TOL
-    limit_up = r > (HOSE_DAILY_LIMIT_LOG - 1e-4)
-    limit_down  = r < - (HOSE_DAILY_LIMIT_LOG - 1e-4)
-    out = {
-        'n': int(n),
-        'pct_zero': float(zero.mean()*100),
-        'pct_limit_up': float(limit_up.mean()*100),
-        'pct_limit_down': float(limit_down.mean()*100),
-    }
-    if volume is not None:
-        v = volume.reindex(r.index)
-        out['pct_zero_no_volume'] = float(
-            (zero&(v.fillna(0)==0)).mean()*100
+    Compute close-to-close rolling annualized volatility from log returns.
+
+    Formula:
+        rolling_vol_t = std(log_return over rolling window) * sqrt(252)
+
+    This is the main volatility measure used in this project.
+    It does not depend on Open, High, or Low.
+    """
+    if min_periods is None:
+        min_periods = window
+
+    out = pd.DataFrame(index=wide.index)
+
+    for col in return_cols:
+        if col not in wide.columns:
+            continue
+
+        name = col.replace("_log_return", f"_return_vol_{window}")
+        out[name] = (
+            wide[col]
+            .rolling(window=window, min_periods=min_periods)
+            .std()
+            * np.sqrt(annualization_factor)
         )
+
+    return out
+
+
+def rolling_vol_multi_window(
+    wide: pd.DataFrame,
+    return_cols: list[str],
+    windows: tuple[int, ...] = (20, 60),
+    min_period_ratio: float = 0.75,
+    annualization_factor: int = 252,
+) -> pd.DataFrame:
+    """
+    Compute rolling return volatility for multiple windows.
+
+    Example outputs:
+    - FPT_return_vol_20
+    - FPT_return_vol_60
+    """
+    out = pd.DataFrame(index=wide.index)
+
+    for window in windows:
+        min_periods = int(window * min_period_ratio)
+
+        vol = rolling_vol_panel(
+            wide=wide,
+            return_cols=return_cols,
+            window=window,
+            min_periods=min_periods,
+            annualization_factor=annualization_factor,
+        )
+
+        out = pd.concat([out, vol], axis=1)
+
+    return out
+
+
+def liquidity_stats(
+    returns: pd.Series,
+    volume: pd.Series | None = None,
+) -> dict:
+    """
+    Compute liquidity and zero-return diagnostics.
+
+    Compatible with summary.py call:
+        row.update(liquidity_stats(returns, volume=volume))
+
+    Parameters
+    ----------
+    returns:
+        Log-return series of one symbol.
+    volume:
+        Volume series of one symbol. Optional.
+
+    Returns
+    -------
+    dict
+        Summary metrics for zero returns and zero volume.
+    """
+
+    out = {}
+
+    returns = pd.to_numeric(returns, errors="coerce")
+
+    zero_return = returns.eq(0)
+
+    out["zero_return_rows"] = int(zero_return.sum())
+    out["zero_return_rate"] = zero_return.mean()
+
+    out["missing_return_rows"] = int(returns.isna().sum())
+    out["missing_return_rate"] = returns.isna().mean()
+
+    if volume is None:
+        out["zero_volume_rows"] = np.nan
+        out["zero_volume_rate"] = np.nan
+
+        out["zero_return_no_volume_rows"] = np.nan
+        out["zero_return_no_volume_rate"] = np.nan
+
+        out["zero_return_with_volume_rows"] = np.nan
+        out["zero_return_with_volume_rate"] = np.nan
+
+        return out
+
+    volume = pd.to_numeric(volume, errors="coerce")
+
+    zero_volume = volume.eq(0)
+
+    out["zero_volume_rows"] = int(zero_volume.sum())
+    out["zero_volume_rate"] = zero_volume.mean()
+
+    zero_return_no_volume = zero_return & zero_volume
+    zero_return_with_volume = zero_return & volume.gt(0)
+
+    out["zero_return_no_volume_rows"] = int(zero_return_no_volume.sum())
+    out["zero_return_no_volume_rate"] = zero_return_no_volume.mean()
+
+    out["zero_return_with_volume_rows"] = int(zero_return_with_volume.sum())
+    out["zero_return_with_volume_rate"] = zero_return_with_volume.mean()
+
     return out

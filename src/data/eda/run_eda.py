@@ -19,8 +19,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .data_quality import build_data_quality_from_wide
-
+from .data_quality import save_key_data_quality, print_key_data_quality
+from .volatility import rolling_vol_panel, rolling_vol_multi_window
 from .autocorr import acf_table, autocorr_summary
 from .constants import (
     MARKET_INDICES,
@@ -32,6 +32,7 @@ from .correlation import (
     pairwise_rolling,
     partial_corr_matrix,
     pearson_corr,
+    spearman_corr,
 )
 from .distribution import distribution_summary
 from .loader import load_wide
@@ -55,7 +56,8 @@ DATA_DIR = PROJECT_ROOT / "data"
 EDA_DATASET = DATA_DIR / "processed" / "eda" / "eda_processed.csv"
 TABLES_DIR = DATA_DIR / "reports" / "tables"
 FIGURES_DIR = DATA_DIR / "reports" / "figures"
-
+DATA_QUALITY_TABLE = TABLES_DIR / "00_data_quality.csv"
+KEY_DATA_QUALITY_TABLE = TABLES_DIR / "00_key_data_quality.csv"
 class StepCounter:
     def __init__(self, total: int) -> None:
         self.total = total
@@ -79,15 +81,13 @@ def main() -> None:
         f"[load] shape={wide.shape}  "
         f"range={wide.index.min().date()} -> {wide.index.max().date()}"
     )
-    # Quality
-    data_quality = build_data_quality_from_wide(
-    wide,
-    symbols=all_syms,
-    date_col="trading_date",
-)
-
-    data_quality.to_csv(TABLES_DIR / "00_data_quality.csv")
-    steps.done("Data quality checks done.")
+    # ---------- 1b. Data Quality ----------
+    key_quality = save_key_data_quality(
+        quality_path=DATA_QUALITY_TABLE,
+        output_path=KEY_DATA_QUALITY_TABLE,
+    )
+    print_key_data_quality(key_quality)
+    print("[1b] Key data quality table done.")
 
     #  Descriptive  
     describe_wide(wide, cc, kind="price").to_csv(
@@ -144,13 +144,20 @@ def main() -> None:
 
     # Correlation  
     corr_ret = pearson_corr(wide, rc)
+    corr_spearman_ret = spearman_corr(wide, rc)
     corr_close = pearson_corr(wide, cc)
     corr_ret.to_csv(TABLES_DIR / "08_corr_log_return.csv")
+    corr_spearman_ret.to_csv(TABLES_DIR / "08b_corr_spearman_log_return.csv")
     corr_close.to_csv(TABLES_DIR / "09_corr_close.csv")
     plot_correlation_heatmap(
         corr_ret,
         "Log-return correlation",
         FIGURES_DIR / "corr_log_return.png",
+    )
+    plot_correlation_heatmap(
+    corr_spearman_ret,
+    "Spearman log-return correlation",
+    FIGURES_DIR / "corr_spearman_log_return.png",
     )
     plot_correlation_heatmap(
         corr_close,
@@ -185,13 +192,20 @@ def main() -> None:
         save_path=FIGURES_DIR / "rolling_corr_vs_vnindex.png",
     )
     rolling_vol_df = rolling_vol_panel(
-        wide, [f"{t}_log_return" for t in STOCK_CODES], window=60
+        wide=wide,
+        return_cols=[f"{t}_log_return" for t in STOCK_CODES],
+        window=60,
+        min_periods=45,
     )
+
+    rolling_vol_df.to_csv(TABLES_DIR / "11_rolling_return_vol_60.csv")
+
     plot_rolling_vol(
         rolling_vol_df,
-        title="60-day rolling annualised volatility",
-        save_path=FIGURES_DIR / "rolling_vol.png",
+        title="60-day rolling annualized volatility from log returns",
+        save_path=FIGURES_DIR / "rolling_return_vol_60.png",
     )
+
     steps.done("Rolling vol + corr done.")
 
     # Prices + drawdowns  

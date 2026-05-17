@@ -30,7 +30,6 @@ from .constants import TRADING_DAYS_PER_YEAR
 from .distribution import fit_student_t, jarque_bera
 from .stationarity import adf_test, kpss_test
 from .stats import max_drawdown
-from .volatility import liquidity_stats
 
 def zero_return_counts(
     returns: pd.Series,
@@ -51,40 +50,8 @@ def zero_return_counts(
 
     out = {
         "n_zero": n_zero,
-        "pct_zero": float(n_zero / n_valid * 100) if n_valid > 0 else np.nan,
+        "pct_zero": float(n_zero / n_valid ) if n_valid > 0 else np.nan,
     }
-
-    if volume is None:
-        out.update(
-            {
-                "n_zero_no_volume": np.nan,
-                "pct_zero_no_volume": np.nan,
-                "n_zero_with_volume": np.nan,
-                "pct_zero_with_volume": np.nan,
-            }
-        )
-        return out
-
-    v = pd.to_numeric(volume, errors="coerce")
-
-    zero_no_volume = zero_mask & (v == 0)
-    zero_with_volume = zero_mask & (v > 0)
-
-    n_zero_no_volume = int(zero_no_volume.sum())
-    n_zero_with_volume = int(zero_with_volume.sum())
-
-    out.update(
-        {
-            "n_zero_no_volume": n_zero_no_volume,
-            "pct_zero_no_volume": float(n_zero_no_volume / n_valid * 100)
-            if n_valid > 0
-            else np.nan,
-            "n_zero_with_volume": n_zero_with_volume,
-            "pct_zero_with_volume": float(n_zero_with_volume / n_valid * 100)
-            if n_valid > 0
-            else np.nan,
-        }
-    )
 
     return out
 def build_summary_row(
@@ -101,7 +68,7 @@ def build_summary_row(
     row = {
         "stock_code": stock_code,
         "n": int(r.count()),
-        "pct_missing": float(returns.isna().mean() * 100),
+        "pct_missing": float(returns.isna().mean() ),
         "mean": float(mu),
         "std": float(sd),
         "std_annual": float(sd * np.sqrt(TRADING_DAYS_PER_YEAR)),
@@ -117,7 +84,6 @@ def build_summary_row(
         "max_drawdown": max_drawdown(p),
     }
 
-    row.update(liquidity_stats(returns, volume=volume))
     row.update(zero_return_counts(returns, volume=volume))
     # --- distribution ---
     jb = jarque_bera(r)
