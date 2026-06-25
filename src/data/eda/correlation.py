@@ -8,14 +8,10 @@ import pandas as pd
 import numpy as np
 
 def pearson_corr(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Pearson correlation, pairwise (does not require all columns non-NaN)."""
     return df[columns].corr(method="pearson", min_periods=30)
 
 
 def spearman_corr(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Rank-based correlation; robust to outliers and non-linear monotone
-    relationships. Useful as a sanity check against Pearson on fat-tailed data.
-    """
     return df[columns].corr(method="spearman", min_periods=30)
 def partial_corr(df:pd.DataFrame, x:str,y:str, given: str)-> float:
     """
@@ -31,7 +27,6 @@ def partial_corr(df:pd.DataFrame, x:str,y:str, given: str)-> float:
     return float((r_xy - r_xz*r_yz) / denom)
 
 def partial_corr_matrix(df:pd.DataFrame,columns:list[str],given:str) ->pd.DataFrame:
-    """Pairwise partial correlation matrix controlling for one series."""
     out = pd.DataFrame(index=columns, columns=columns, dtype=float)
     for i, a in enumerate(columns):
         for j, b in enumerate(columns):
@@ -45,13 +40,11 @@ def partial_corr_matrix(df:pd.DataFrame,columns:list[str],given:str) ->pd.DataFr
 
 
 def rolling_corr(s1: pd.Series, s2: pd.Series, window: int = 60) -> pd.Series:
-    """Rolling Pearson correlation between two series."""
     return s1.rolling(window).corr(s2)
 
 
 def pairwise_rolling(df: pd.DataFrame, base: str, others: list[str],
                      window: int = 60) -> pd.DataFrame:
-    """Rolling correlation of `base` vs each column in `others`."""
     return pd.DataFrame(
         {c: rolling_corr(df[base], df[c], window) for c in others},
         index=df.index,

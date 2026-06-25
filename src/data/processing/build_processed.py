@@ -1,20 +1,3 @@
-"""
-Build processed datasets from raw CSVs for EDA and modeling.
-
-Main design:
-- EDA uses the overall common period shared by all selected stocks and market indices.
-- OHLC invalid rows are flagged, not dropped and not interpolated.
-- Main volatility is rolling volatility from log returns, computed later in EDA.
-- Garman-Klass volatility is not used in the baseline pipeline.
-- Known HOSE disruption dates are flagged: 2018-01-23 and 2018-01-24.
-
-Outputs:
-- data/processed/stock/stock_full_clean.csv
-- data/processed/stock/stock_common_clean.csv
-- data/processed/market/market_common_clean.csv
-- data/processed/eda/eda_processed.csv
-- data/reports/tables/00_data_quality.csv
-"""
 
 from __future__ import annotations
 
@@ -33,12 +16,12 @@ from src.data.crawl import config as cfg
 PROJECT_ROOT = Path.cwd()
 DATA_DIR = PROJECT_ROOT / "data"
 
-PROCESSED_DIR = DATA_DIR / "processed"
+PROCESSED_DIR = DATA_DIR / "processed1"
 PROCESSED_STOCK_DIR = PROCESSED_DIR / "stock"
 PROCESSED_MARKET_DIR = PROCESSED_DIR / "market"
 PROCESSED_EDA_DIR = PROCESSED_DIR / "eda"
 
-REPORT_TABLES_DIR = DATA_DIR / "reports" / "tables"
+REPORT_TABLES_DIR = DATA_DIR / "reports1" / "tables"
 
 
 # =============================================================================
@@ -530,9 +513,9 @@ def main() -> None:
 
     # 6. Data quality report on common period
     quality = build_quality_table(stock_common_panels, market_common_panels)
-    out = REPORT_TABLES_DIR / "00_data_quality.csv"
+    out = REPORT_TABLES_DIR / "000000_data_quality.csv"
     quality.to_csv(out, index=False, encoding="utf-8")
-    print("Done 00_data_quality.csv")
+    print("Done 000000_data_quality.csv")
 
 
 if __name__ == "__main__":

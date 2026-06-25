@@ -11,15 +11,6 @@ def rolling_vol_panel(
     min_periods: int | None = None,
     annualization_factor: int = 252,
 ) -> pd.DataFrame:
-    """
-    Compute close-to-close rolling annualized volatility from log returns.
-
-    Formula:
-        rolling_vol_t = std(log_return over rolling window) * sqrt(252)
-
-    This is the main volatility measure used in this project.
-    It does not depend on Open, High, or Low.
-    """
     if min_periods is None:
         min_periods = window
 
@@ -47,13 +38,6 @@ def rolling_vol_multi_window(
     min_period_ratio: float = 0.75,
     annualization_factor: int = 252,
 ) -> pd.DataFrame:
-    """
-    Compute rolling return volatility for multiple windows.
-
-    Example outputs:
-    - FPT_return_vol_20
-    - FPT_return_vol_60
-    """
     out = pd.DataFrame(index=wide.index)
 
     for window in windows:
@@ -76,24 +60,6 @@ def liquidity_stats(
     returns: pd.Series,
     volume: pd.Series | None = None,
 ) -> dict:
-    """
-    Compute liquidity and zero-return diagnostics.
-
-    Compatible with summary.py call:
-        row.update(liquidity_stats(returns, volume=volume))
-
-    Parameters
-    ----------
-    returns:
-        Log-return series of one symbol.
-    volume:
-        Volume series of one symbol. Optional.
-
-    Returns
-    -------
-    dict
-        Summary metrics for zero returns and zero volume.
-    """
 
     out = {}
 

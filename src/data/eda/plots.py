@@ -34,7 +34,7 @@ def plot_prices(
         ax.plot(x,df[c],label =c, linewidth = 1)
     ax.set_title(title)
     ax.set_xlabel('Date')
-    ax.set_ylabel('Price(log scale)' if log_y else "Price")
+    ax.set_ylabel('Price(log scale)' if log_y else "Index points")
     if log_y:
         ax.set_yscale("log")
     ax.legend(loc = 'upper left',ncol = 2,fontsize = 9)
@@ -63,12 +63,6 @@ def plot_qq(
     title: str = "",
     save_path: Path | None = None,
 ) -> None:
-    """QQ-plot vs Normal and vs Student-t (df fit by MLE).
-
-    Reading:
-    - Normal QQ that curves into an S-shape at both ends ⇒ fat tails.
-    - t-QQ that is approximately straight ⇒ Student-t is a good model.
-    """
     s = series.dropna().values
     df_t, loc, scale = sps.t.fit(s)
 
@@ -162,3 +156,36 @@ def plot_drawdown(
     ax.set_ylabel("Drawdown")
     ax.grid(alpha=0.3)
     _save_plot(fig, save_path)
+
+def plot_quality_metric(metric, title):
+    tables_dir = Path("data/reports/tables")
+    figures_dir = Path("data/reports/figures")
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    quality = pd.read_csv(tables_dir / "00_key_data_quality.csv")
+    plot_df = quality.sort_values(metric, ascending=False)
+
+    plt.figure(figsize=(10, 5))
+    plt.bar(plot_df["symbol"], plot_df[metric])
+    plt.title(title)
+    plt.xlabel("Symbol")
+    plt.ylabel(metric)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(figures_dir / f"quality_{metric}.png", dpi=150)
+    plt.close()
+
+plot_quality_metric(
+    "pct_ohlc_invalid",
+    "OHLC Invalid Rate by Symbol"
+)
+
+plot_quality_metric(
+    "pct_zero_return_rows",
+    "Zero-return Rate by Symbol"
+)
+
+plot_quality_metric(
+    "pct_volume_eq_0",
+    "Zero-volume Rate by Symbol"
+)
