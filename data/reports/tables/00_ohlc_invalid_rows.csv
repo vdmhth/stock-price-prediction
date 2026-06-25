@@ -1,4 +1,4 @@
-symbol,index_code,trading_date,open,high,low,close,volume
+source_file,symbol_code,trading_date,open,high,low,close,volume
 market_common_clean,VN30,2012-02-21,459.71,475.54,460.72,462.27,25524870
 market_common_clean,VN30,2012-02-22,459.71,470.97,460.85,470.97,19632000
 market_common_clean,VN30,2012-02-24,471.23,483.72,476.93,477.77,26683350

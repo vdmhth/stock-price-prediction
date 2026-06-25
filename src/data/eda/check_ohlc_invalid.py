@@ -6,17 +6,20 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-RAW_STOCK_DIR = PROJECT_ROOT / "data" / "processed" / "market"
-RAW_INDEX_DIR = PROJECT_ROOT / "data" / "processed" / "market"
+
+RAW_STOCK_DIR = PROJECT_ROOT / "data" / "raw" / "stock"
+RAW_INDEX_DIR = PROJECT_ROOT / "data" / "raw" / "market"
 
 REPORT_DIR = PROJECT_ROOT / "data" / "reports" / "tables"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
+SYMBOL_COL_ALIASES = ("stock_code", "index", "index_code", "symbol_code")
+CANONICAL_SYMBOL_COL = "symbol_code"
 
 
-SYMBOLS = ['stock_common_clean','market_common_clean']
+SYMBOLS = ["stock_common_clean", "market_common_clean"]
+
 
 def find_csv(symbol: str) -> Path | None:
-    """Find raw csv file for a symbol in likely raw-data folders."""
 
     candidates = [
         RAW_STOCK_DIR / f"{symbol}.csv",
@@ -32,14 +35,12 @@ def find_csv(symbol: str) -> Path | None:
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Normalize common column names to trading_date/open/high/low/close/volume."""
-
-    rename_map = {}
+    rename_map: dict[str, str] = {}
 
     for col in df.columns:
         c = col.lower()
 
-        if c in ["time", "date", "tradingdate", "trading_date"]:
+        if c in ("time", "date", "tradingdate", "trading_date"):
             rename_map[col] = "trading_date"
         elif c == "open":
             rename_map[col] = "open"
@@ -47,20 +48,39 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
             rename_map[col] = "high"
         elif c == "low":
             rename_map[col] = "low"
-        elif c in ["close", "matchedprice"]:
+        elif c in ("close", "matchedprice"):
             rename_map[col] = "close"
-        elif c in ["volume", "nmvolume"]:
+        elif c in ("volume", "nmvolume"):
             rename_map[col] = "volume"
+        elif c in SYMBOL_COL_ALIASES:
+            rename_map[col] = CANONICAL_SYMBOL_COL
 
     return df.rename(columns=rename_map)
+
+
+def _ensure_symbol_col(df: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
+
+    if CANONICAL_SYMBOL_COL not in df.columns:
+        df = df.copy()
+        df[CANONICAL_SYMBOL_COL] = fallback_symbol
+
+    return df
 
 
 def check_ohlc_invalid(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
     """Return rows that violate OHLC consistency."""
 
     df = normalize_columns(df.copy())
+    df = _ensure_symbol_col(df, fallback_symbol=symbol)
 
-    required = ['index_code',"trading_date", "open", "high", "low", "close"]
+    required = [
+        CANONICAL_SYMBOL_COL,
+        "trading_date",
+        "open",
+        "high",
+        "low",
+        "close",
+    ]
     missing = [c for c in required if c not in df.columns]
 
     if missing:
@@ -83,13 +103,19 @@ def check_ohlc_invalid(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
         | (df["low"] > df["high"])
     )
 
-    invalid = df.loc[
-        invalid_mask,
-        ['index_code',"trading_date", "open", "high", "low", "close"]
-        + (["volume"] if "volume" in df.columns else []),
-    ].copy()
+    keep_cols = [
+        CANONICAL_SYMBOL_COL,
+        "trading_date",
+        "open",
+        "high",
+        "low",
+        "close",
+    ]
+    if "volume" in df.columns:
+        keep_cols.append("volume")
 
-    invalid.insert(0, "symbol", symbol)
+    invalid = df.loc[invalid_mask, keep_cols].copy()
+    invalid.insert(0, "source_file", symbol)
 
     return invalid
 
@@ -119,7 +145,16 @@ def main() -> None:
         out = pd.concat(all_invalid, ignore_index=True)
     else:
         out = pd.DataFrame(
-            columns=["index_code" ,"trading_date", "open", "high", "low", "close", "volume"]
+            columns=[
+                "source_file",
+                CANONICAL_SYMBOL_COL,
+                "trading_date",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+            ]
         )
 
     save_path = REPORT_DIR / "00_ohlc_invalid_rows.csv"

@@ -1,6 +1,6 @@
 STOCK_CODES = ["VCB", "FPT", "VIC", "HPG", "VNM"]
 MARKET_INDICES = ["VNINDEX", "VN30"]
-START_DATE = '2000-01-01'
+START_DATE = '2012-02-06'
 END_DATE = '2025-12-31'
 RAW_STOCK_DIR = 'data/raw/stock/'
 RAW_MARKET_DIR = 'data/raw/market/'

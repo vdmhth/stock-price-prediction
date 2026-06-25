@@ -1,15 +1,9 @@
-"""Distribution diagnosis: normality test and Student-t fit"""
 from __future__ import annotations
 import numpy as np
 import pandas as pd
 from scipy import stats as sps
 
 def jarque_bera(s:pd.Series) ->dict:
-    """Jarque-Bera test for normality based on skew+kurtosis.
-
-    H0: data is normal.
-    p < 0.05 => reject normality.
-    """
     s = s.dropna()
     stat,pval = sps.jarque_bera(s)
     return {
@@ -18,10 +12,6 @@ def jarque_bera(s:pd.Series) ->dict:
         'jb_normal': pval >= 0.05,
     }
 def fit_student_t(s:pd.Series) ->dict:
-    """Fit a Student-t distribution by MLE.
-
-    Returns the degrees of freedom; smaller df ⇒ fatter tails.
-    Typical equity returns fit df in [3, 6]."""
     s = s.dropna().values
     df,loc,scale= sps.t.fit(s)
     ll_t = float(np.sum(sps.t.logpdf(s, df, loc=loc, scale=scale)))

@@ -1,19 +1,3 @@
-"""Stationarity tests: ADF, KPSS (both 'c' and 'ct'), Zivot-Andrews.
-
-ADF H0: unit root (non-stationary). Reject (p < 0.05) ⇒ stationary.
-KPSS H0: stationary. Reject (p < 0.05) ⇒ non-stationary.
-
-Joint logic with KPSS regression='c' (level stationarity):
-    ADF stat,   KPSS stat   ⇒  stationary
-    ADF nstat,  KPSS nstat  ⇒  non-stationary (likely I(1))
-    ADF stat,   KPSS nstat  ⇒  difference-stationary
-                                (or structural break — verify with ZA)
-    ADF nstat,  KPSS stat   ⇒  trend-stationary
-                                (re-run KPSS with regression='ct' to confirm)
-
-KPSS p-values from statsmodels are clamped to [0.01, 0.10] (lookup table).
-Treat the boundary values as 'p ≤ 0.01' or 'p ≥ 0.10', not exact.
-"""
 from __future__ import annotations
 
 import warnings
@@ -29,6 +13,7 @@ def adf_test(s: pd.Series) -> dict:
         "adf_stat": float(stat),
         "adf_pval": float(pval),
         "adf_lags": int(lags),
+        "adf_pval_at_bound": bool(pval <= 0.001 or pval >= 0.99), 
         "adf_crit_5pct": float(crit["5%"]),
         "adf_stationary": bool(pval < 0.05),
     }
@@ -45,6 +30,7 @@ def kpss_test(s: pd.Series, regression: str = "c") -> dict:
         f"kpss_{regression}_stat": float(stat),
         f"kpss_{regression}_pval": float(pval),
         f"kpss_{regression}_lags": int(lags),
+        f"kpss_{regression}_pval_at_bound": bool(pval <= 0.01 or pval >= 0.10), 
         f"kpss_{regression}_crit_5pct": float(crit["5%"]),
         f"kpss_{regression}_stationary": bool(pval > 0.05),
     }
@@ -57,13 +43,15 @@ _VERDICT_MAP = {
     (False, True): "trend-stationary",
 }
 
+def _fmt_p(pval: float, at_bound: bool, kind: str) -> str:
 
+    if at_bound:
+        if kind == "kpss":
+            return "<0.01" if pval <= 0.01 else ">0.10"
+        return ">0.99" if pval >= 0.99 else "<0.001"
+    return f"{pval:.4f}"
 def stationarity_summary(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Run ADF + KPSS('c') + KPSS('ct') for each column.
 
-    If the level-KPSS rejects but trend-KPSS does not, the series is more
-    naturally described as trend-stationary than as integrated.
-    """
     rows = []
     for c in columns:
         adf = adf_test(df[c])
@@ -83,14 +71,7 @@ def stationarity_summary(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 
 def zivot_andrews(s: pd.Series, regression: str = "c") -> dict:
-    """ADF allowing one endogenous structural break.
 
-    Useful when ADF and KPSS disagree (the difference-stationary case)
-    and you suspect a regime shift rather than non-stationarity.
-
-    H0: unit root with no break. Reject (p < 0.05) ⇒ trend-stationary with
-    a break at the estimated break date.
-    """
     from statsmodels.tsa.stattools import zivot_andrews as za
 
     s = s.dropna()
@@ -106,3 +87,45 @@ def zivot_andrews(s: pd.Series, regression: str = "c") -> dict:
         "za_break_date": str(s.index[bp_idx]) if bp_idx < len(s) else None,
         "za_stationary_with_break": bool(pval < 0.05),
     }
+def zivot_andrews_summary(
+    df: pd.DataFrame, columns: list[str]
+) -> pd.DataFrame:
+
+    rows = []
+    for c in columns:
+        za_c = zivot_andrews(df[c], regression="c")
+        za_ct = zivot_andrews(df[c], regression="ct")
+        rows.append(
+            {
+                "series": c,
+                "za_c_stat": za_c["za_stat"],
+                "za_c_pval": za_c["za_pval"],
+                "za_c_break_date": za_c["za_break_date"],
+                "za_c_break_with_level_shift": za_c["za_stationary_with_break"],
+                "za_ct_stat": za_ct["za_stat"],
+                "za_ct_pval": za_ct["za_pval"],
+                "za_ct_break_date": za_ct["za_break_date"],
+                "za_ct_break_with_trend": za_ct["za_stationary_with_break"],
+            }
+        )
+    return pd.DataFrame(rows).set_index("series")
+def merged_stationarity_table(
+    df: pd.DataFrame, symbols: list[str]
+) -> pd.DataFrame:
+    sc = stationarity_summary(df, [f"{s}_close" for s in symbols])
+    sr = stationarity_summary(df, [f"{s}_log_return" for s in symbols])
+
+    rows = []
+    for s in symbols:
+        c = sc.loc[f"{s}_close"]
+        r = sr.loc[f"{s}_log_return"]
+        rows.append({
+            "Symbol": s,
+            "ADF p (close)":   _fmt_p(c["adf_pval"],   c["adf_pval_at_bound"],   "adf"),
+            "KPSS p (close)":  _fmt_p(c["kpss_c_pval"], c["kpss_c_pval_at_bound"], "kpss"),
+            "Verdict (close)": c["verdict"],
+            "ADF p (return)":   _fmt_p(r["adf_pval"],   r["adf_pval_at_bound"],   "adf"),
+            "KPSS p (return)":  _fmt_p(r["kpss_c_pval"], r["kpss_c_pval_at_bound"], "kpss"),
+            "Verdict (return)": r["verdict"],
+        })
+    return pd.DataFrame(rows).set_index("Symbol")
