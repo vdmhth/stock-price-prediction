@@ -6,7 +6,8 @@
   3. Distribution           -> 03_distribution.csv, qq_*.png, return_dist_*.png
   4. Stationarity           -> 04_stationarity_close.csv,
                                 05_stationarity_log_return.csv
-  5. Autocorr / LB / ARCH   -> 06_acf_pacf_{sym}.csv, 07_autocorr_tests.csv,
+                                06_zivot_andrews_log_return.csv
+  5. Autocorr / LB / ARCH   -> 07_acf_pacf_{sym}.csv, 07_autocorr_tests.csv,
                                 acf_pacf_*.png
   6. Correlation            -> 08_corr_log_return.csv, 09_corr_close.csv,
                                 10_partial_corr_vs_vnindex.csv, corr_*.png
@@ -46,10 +47,13 @@ from .plots import (
     plot_rolling_corr,
     plot_rolling_vol,
 )
-from .stationarity import stationarity_summary
+from .stationarity import stationarity_summary, zivot_andrews_summary,merged_stationarity_table
 from .stats import describe_wide
 from .summary import build_summary
 from .volatility import rolling_vol_panel
+from .horizon_target import horizon_target_panel
+from .feature_target import feature_target_panel, best_feature_per_target
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -114,19 +118,19 @@ def main() -> None:
     steps.done(" Distribution diagnostics done.")
 
     #  Stationarity  
-    stationarity_summary(wide, cc).to_csv(
-        TABLES_DIR / "04_stationarity_close.csv"
+    merged_stationarity_table(wide, STOCK_CODES + MARKET_INDICES).to_csv(
+        TABLES_DIR / "04_stationarity_combined.csv"
     )
-    stationarity_summary(wide, rc).to_csv(
-        TABLES_DIR / "05_stationarity_log_return.csv"
-    )
+    zivot_andrews_summary(wide, rc).to_csv(          
+        TABLES_DIR / "06_zivot_andrews_log_return.csv"  
+    ) 
     steps.done(" Stationarity tests done.")
 
     #  ACF/PACF, Ljung-Box, ARCH-LM  
     autocorr_summary(wide, rc).to_csv(TABLES_DIR / "07_autocorr_tests.csv")
     for t in STOCK_CODES:
         acf_table(wide[f"{t}_log_return"], nlags=20).to_csv(
-            TABLES_DIR / f"06_acf_pacf_{t}.csv"
+            TABLES_DIR / f"07_acf_pacf_{t}.csv"
         )
         plot_acf_pacf(
             wide[f"{t}_log_return"],
@@ -222,7 +226,7 @@ def main() -> None:
         wide_reset,
         close_cols(MARKET_INDICES),
         date_col="trading_date",
-        title="Market index close prices",
+        title="Market index close levels",
         save_path=FIGURES_DIR / "prices_indices.png",
     )
     for t in STOCK_CODES:
@@ -232,6 +236,10 @@ def main() -> None:
             save_path=FIGURES_DIR / f"drawdown_{t}.png",
         )
     steps.done("Price + drawdown plots done.")
+    horizon_target_panel(wide).to_csv(TABLES_DIR / "12_horizon_target.csv", index=False)
+    ft = feature_target_panel(wide)
+    ft.to_csv(TABLES_DIR / "13_feature_target_screen.csv", index=False)
+    best_feature_per_target(ft, top_k=3).to_csv(TABLES_DIR / "13b_top_features.csv", index=False)
 
     #Executive summary  
     summary = build_summary(wide, stock_codes =all_syms, has_volume=True)

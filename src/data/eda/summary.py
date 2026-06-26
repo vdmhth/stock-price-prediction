@@ -1,25 +1,3 @@
-"""One-row-per-symbol executive summary table.
-
-n, pct_missing             : sanity
-mean, std, std_annual      : level/scale
-sharpe_like                : mean/std * sqrt(252)
-skew, kurt_excess          : shape
-q01, q05, q95, q99         : tail / historical VaR
-max_drawdown               : worst peak-to-trough on the underlying price
-pct_zero                   : liquidity flag
-n_zero                     : number of zero-return observations
-pct_zero_no_volume         : % zero-return observations with volume = 0
-n_zero_no_volume           : count of zero-return observations with volume = 0
-pct_zero_with_volume       : % zero-return observations with volume > 0
-n_zero_with_volume         : count of zero-return observations with volume > 0
-pct_limit_up, pct_limit_down : HOSE 7%-cap incidence
-jb_pval                    : normality (small ⇒ non-normal)
-t_df                       : Student-t MLE df (3-5 ⇒ fat tails)
-adf_pval, kpss_c_pval      : stationarity (return should be stationary)
-lb_10_pval                 : autocorr in r        (large ⇒ white noise)
-lb_abs_10_pval             : autocorr in |r|      (small ⇒ vol clustering)
-arch_pval                  : ARCH-LM              (small ⇒ heteroscedasticity)
-"""
 from __future__ import annotations
 
 import numpy as np
