@@ -508,3 +508,153 @@
 [GIAI DOA N 4] Trading Metrics:
   - Direction Accuracy: 0.6047 | Sharpe: 0.9266
 =====================================================================
+
+==================== EVALUATION REPORT: FPT_XGB_psh_5D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.027677 | RMSE: 0.037645 | R²: -0.008508
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.4300
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9388
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.5618 | Sharpe: 1.0889
+=====================================================================
+
+==================== EVALUATION REPORT: FPT_XGB_psh_20D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.057475 | RMSE: 0.074691 | R²: -0.027391
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.1100
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9464
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.6369 | Sharpe: 1.0562
+=====================================================================
+
+==================== EVALUATION REPORT: HPG_XGB_psh_5D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.035262 | RMSE: 0.049074 | R²: -0.007025
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.3700
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9452
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.5548 | Sharpe: 0.5176
+=====================================================================
+
+==================== EVALUATION REPORT: HPG_XGB_psh_20D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.077102 | RMSE: 0.105455 | R²: -0.027810
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.0800
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9382
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.5793 | Sharpe: 0.4761
+=====================================================================
+
+==================== EVALUATION REPORT: VCB_XGB_psh_5D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.025135 | RMSE: 0.034893 | R²: -0.000293
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.4100
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9493
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.5090 | Sharpe: 0.5279
+=====================================================================
+
+==================== EVALUATION REPORT: VCB_XGB_psh_20D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.050004 | RMSE: 0.068946 | R²: 0.003483
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.1100
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9504
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.5545 | Sharpe: 0.5047
+=====================================================================
+
+==================== EVALUATION REPORT: VIC_XGB_psh_5D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.034931 | RMSE: 0.051288 | R²: -0.018928
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.3000
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9248
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.4814 | Sharpe: 0.0992
+=====================================================================
+
+==================== EVALUATION REPORT: VIC_XGB_psh_20D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.078794 | RMSE: 0.113595 | R²: -0.002507
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.0600
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9161
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.4703 | Sharpe: 0.4221
+=====================================================================
+
+==================== EVALUATION REPORT: VNM_XGB_psh_5D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.023249 | RMSE: 0.031214 | R²: -0.048602
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.4500
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9394
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.4470 | Sharpe: -0.1539
+=====================================================================
+
+==================== EVALUATION REPORT: VNM_XGB_psh_20D ====================
+
+[GIAI DOA N 2] Forecast Metrics:
+  - MAE: 0.048760 | RMSE: 0.060425 | R²: -0.233978
+
+[GIAI DOA N 3] Residual Diagnostics:
+  - Durbin-Watson: 0.1200
+  - Ljung-Box: 0.0000 -> FAIL
+  - Heteroskedasticity: 0.0000 -> FAIL
+  - 95% CI Coverage: 0.9237
+
+[GIAI DOA N 4] Trading Metrics:
+  - Direction Accuracy: 0.4411 | Sharpe: -0.2015
+=====================================================================
