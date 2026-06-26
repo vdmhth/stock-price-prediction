@@ -1,0 +1,8 @@
+Symbol,ADF p (close),KPSS p (close),Verdict (close),ADF p (return),KPSS p (return),Verdict (return)
+FPT,0.9735,<0.01,non-stationary,<0.001,>0.10,stationary
+VCB,0.8525,<0.01,non-stationary,<0.001,>0.10,stationary
+VIC,>0.99,<0.01,non-stationary,<0.001,0.0581,stationary
+VNM,0.2210,<0.01,non-stationary,<0.001,0.0129,trend-stationary (level-KPSS rejected)
+HPG,0.7817,<0.01,non-stationary,<0.001,>0.10,stationary
+VNINDEX,0.9552,<0.01,non-stationary,<0.001,>0.10,stationary
+VN30,0.9892,<0.01,non-stationary,<0.001,>0.10,stationary
