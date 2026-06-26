@@ -1,0 +1,9 @@
+STOCK_CODES = ["VCB", "FPT", "VIC", "HPG", "VNM"]
+MARKET_INDICES = ["VNINDEX", "VN30"]
+START_DATE = '2012-02-06'
+END_DATE = '2025-12-31'
+RAW_STOCK_DIR = 'data/raw/stock/'
+RAW_MARKET_DIR = 'data/raw/market/'
+METADATA_DIR = 'data/raw/metadata/'
+PROCESSED_STOCK_DIR = 'data/processed/stock/'
+INTERVAL = '1D'
